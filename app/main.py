@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from app.database.connection import Base, engine
+from app.models.user_model import User
 from app.routes.user_routes import router as user_router
 
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Device Systems API",

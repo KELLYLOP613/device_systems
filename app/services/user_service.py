@@ -1,84 +1,110 @@
-from app.data.users_db import users_db
+from sqlalchemy.orm import Session
+
+from app.models.user_model import User
 
 
-def get_all_users():
-    """Obtiene todos los usuarios."""
-    return users_db
+def get_all_users(
+    db: Session,
+    role: str | None = None,
+    is_active: bool | None = None
+):
+    """Obtiene los usuarios aplicando filtros y orden por nombre."""
+
+    query = db.query(User)
+
+    if role is not None:
+        query = query.filter(User.role == role)
+
+    if is_active is not None:
+        query = query.filter(User.is_active == is_active)
+
+    return query.order_by(User.name.asc()).all()
 
 
-def get_user_by_id(user_id: int):
+def get_user_by_id(db: Session, user_id: int):
     """Busca un usuario por su ID."""
-    for user in users_db:
-        if user["id"] == user_id:
-            return user
 
-    return None
+    return db.query(User).filter(User.id == user_id).first()
 
 
-def email_exists(email: str, exclude_user_id: int | None = None):
+def get_user_by_email(db: Session, email: str):
+    """Busca un usuario por su correo."""
+
+    return db.query(User).filter(User.email == email).first()
+
+def email_exists(
+    db: Session,
+    email: str,
+    exclude_user_id: int | None = None,
+):
     """Comprueba si un correo ya está registrado."""
-    for user in users_db:
-        if user["email"] == email:
-            if exclude_user_id is None or user["id"] != exclude_user_id:
-                return True
 
-    return False
+    query = db.query(User).filter(User.email == email)
 
+    if exclude_user_id is not None:
+        query = query.filter(User.id != exclude_user_id)
 
-def create_user(user_data):
-    """Crea un nuevo usuario."""
+    return query.first() is not None
 
-    new_id = max((user["id"] for user in users_db), default=0) + 1
+def create_user(db: Session, user_data):
+    """Crea un nuevo usuario en la base de datos."""
 
-    new_user = {
-        "id": new_id,
-        "name": user_data.name,
-        "email": user_data.email,
-        "role": user_data.role,
-        "is_active": user_data.is_active
-    }
+    new_user = User(
+        name=user_data.name,
+        email=user_data.email,
+        role=user_data.role,
+        is_active=user_data.is_active
+    )
 
-    users_db.append(new_user)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     return new_user
 
-def update_user(user_id: int, user_data):
+def update_user(
+    db: Session,
+    user: User,
+    user_data,
+):
     """Actualiza completamente un usuario."""
-    user = get_user_by_id(user_id)
 
-    if user is None:
-        return None
+    user.name = user_data.name
+    user.email = user_data.email
+    user.role = user_data.role
+    user.is_active = user_data.is_active
 
-    user["name"] = user_data.name
-    user["email"] = user_data.email
-    user["role"] = user_data.role
-    user["is_active"] = user_data.is_active
+    db.commit()
+    db.refresh(user)
 
     return user
 
 
-def update_user_partial(user_id: int, update_data):
+def update_user_partial(
+    db: Session,
+    user: User,
+    update_data,
+):
     """Actualiza parcialmente un usuario."""
-    user = get_user_by_id(user_id)
-
-    if user is None:
-        return None
 
     data = update_data.model_dump(exclude_unset=True)
 
     for field, value in data.items():
-        user[field] = value
+        setattr(user, field, value)
+
+    db.commit()
+    db.refresh(user)
 
     return user
 
 
-def delete_user(user_id: int):
-    """Elimina un usuario."""
-    user = get_user_by_id(user_id)
+def delete_user(
+    db: Session,
+    user: User,
+):
+    """Elimina un usuario de la base de datos."""
 
-    if user is None:
-        return None
-
-    users_db.remove(user)
+    db.delete(user)
+    db.commit()
 
     return user

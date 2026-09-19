@@ -1,12 +1,17 @@
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from app.dependencies.database_dependency import get_db
 from app.services.user_service import get_user_by_id
 
 
-def get_user_or_404(user_id: int):
-    """Obtiene un usuario o genera un error 404 si no existe."""
+def get_user_or_404(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Obtiene un usuario de la base de datos o genera un error 404."""
 
-    user = get_user_by_id(user_id)
+    user = get_user_by_id(db, user_id)
 
     if user is None:
         raise HTTPException(

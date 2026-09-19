@@ -1,27 +1,38 @@
 # API REST de Gestión de Usuarios - device_systems
 
-## GA1-220501096-01-AA1-EV08
-### FastAPI Intermedio: CRUD Completo, Manejo de Errores, Swagger/OpenAPI y Dependency Injection
+## GA1-220501096-01-AA1-EV09
+
+### FastAPI con SQLAlchemy: Persistencia de Datos y CRUD sobre Base de Datos
 
 ---
 
-## 👩‍💻 Información del proyecto
+## Información del proyecto
 
-**Programa:** Tecnólogo en Análisis y Desarrollo de Software (ADSO)  
-**Entidad:** Servicio Nacional de Aprendizaje - SENA  
-**Proyecto:** `device_systems`  
-**Actividad:** GA1-220501096-01-AA1-EV08  
-**Tecnología principal:** FastAPI  
-**Lenguaje:** Python 3.13  
-**Autor:** Kelly Lopera  
+**Programa:** Tecnólogo en Análisis y Desarrollo de Software (ADSO)
+
+**Entidad:** Servicio Nacional de Aprendizaje - SENA
+
+**Proyecto:** `device_systems`
+
+**Actividad:** GA1-220501096-01-AA1-EV09
+
+**Tecnología principal:** FastAPI + SQLAlchemy
+
+**Lenguaje:** Python 3.13
+
+**Base de datos:** SQLite
+
+**Autor:** Kelly Lopera
 
 ---
 
-## 📌 Descripción
+# Descripción
 
 `device_systems` es una API REST desarrollada con **FastAPI** para la gestión de usuarios de un sistema.
 
-Esta versión corresponde a la evolución del proyecto desarrollado en la actividad anterior y permite implementar un **CRUD completo de usuarios**, incluyendo:
+Esta versión corresponde a la evolución del proyecto desarrollado en las actividades anteriores. En esta etapa se reemplaza el almacenamiento de usuarios en memoria por una **base de datos relacional SQLite**, utilizando **SQLAlchemy como ORM**.
+
+La API permite realizar un CRUD completo de usuarios mediante:
 
 - Consulta de usuarios.
 - Consulta de un usuario por ID.
@@ -29,47 +40,68 @@ Esta versión corresponde a la evolución del proyecto desarrollado en la activi
 - Actualización completa mediante `PUT`.
 - Actualización parcial mediante `PATCH`.
 - Eliminación de usuarios mediante `DELETE`.
+- Persistencia de datos mediante SQLite.
+- Modelado de datos mediante SQLAlchemy.
 - Validación de datos utilizando Pydantic.
-- Manejo de errores HTTP.
 - Validación de correos electrónicos.
 - Validación de roles.
-- Prevención de correos duplicados.
+- Prevención de correos electrónicos duplicados.
+- Manejo de errores HTTP.
 - Dependency Injection mediante `Depends()`.
-- Documentación automática con Swagger/OpenAPI.
 - Filtros por rol y estado de actividad.
+- Ordenamiento de usuarios por nombre.
+- Documentación automática mediante Swagger/OpenAPI.
+- Documentación alternativa mediante ReDoc.
 
-La información se almacena temporalmente en una estructura de datos en memoria, simulando una base de datos.
+La información de los usuarios se almacena en el archivo:
+
+```text
+device_systems.db
+```
+
+Este archivo es generado automáticamente por SQLite al ejecutar la aplicación y contiene los datos persistidos de los usuarios.
+
+El archivo de base de datos no forma parte de los archivos que se deben versionar en GitHub.
+
+Esto permite que los datos permanezcan almacenados aunque se reinicie el servidor.
 
 ---
 
-# 🎯 Objetivos
+# Objetivos
 
 ## Objetivo general
 
-Desarrollar una API REST utilizando FastAPI que permita gestionar usuarios mediante operaciones CRUD, aplicando validaciones, manejo de errores, códigos de estado HTTP, Dependency Injection y documentación automática con Swagger/OpenAPI.
+Desarrollar una API REST utilizando FastAPI y SQLAlchemy que permita gestionar usuarios mediante operaciones CRUD sobre una base de datos SQLite, aplicando validaciones, restricciones, manejo de errores, Dependency Injection y documentación automática con Swagger/OpenAPI.
 
 ## Objetivos específicos
 
-- Implementar endpoints para gestionar usuarios.
-- Aplicar validaciones mediante Pydantic.
+- Implementar una conexión entre FastAPI y una base de datos SQLite.
+- Utilizar SQLAlchemy como ORM para el manejo de los datos.
+- Crear un modelo relacional para los usuarios.
 - Implementar operaciones `GET`, `POST`, `PUT`, `PATCH` y `DELETE`.
-- Utilizar códigos de estado HTTP adecuados.
-- Implementar manejo de errores mediante `HTTPException`.
+- Aplicar validaciones mediante Pydantic.
+- Validar correos electrónicos.
+- Validar los roles permitidos.
 - Evitar registros con correos electrónicos duplicados.
-- Implementar Dependency Injection mediante `Depends()`.
-- Separar las responsabilidades de rutas, servicios, datos, esquemas y dependencias.
-- Documentar la API utilizando Swagger/OpenAPI.
-- Realizar pruebas de los diferentes endpoints y casos de error.
+- Implementar restricciones de integridad mediante SQLAlchemy.
+- Utilizar Dependency Injection para administrar las sesiones de base de datos.
+- Implementar filtros por rol y estado de actividad.
+- Ordenar los usuarios por nombre.
+- Manejar errores mediante `HTTPException` e `IntegrityError`.
+- Documentar la API mediante Swagger/OpenAPI.
+- Comprobar la persistencia de los datos después de reiniciar la aplicación.
 
 ---
 
-# 🛠️ Tecnologías utilizadas
+# Tecnologías utilizadas
 
 - **Python 3.13**
 - **FastAPI**
 - **Uvicorn**
+- **SQLAlchemy**
 - **Pydantic**
 - **Email-validator**
+- **SQLite**
 - **Swagger/OpenAPI**
 - **ReDoc**
 - **Git**
@@ -78,40 +110,42 @@ Desarrollar una API REST utilizando FastAPI que permita gestionar usuarios media
 
 ---
 
-# 📂 Estructura del proyecto
+# Estructura del proyecto
 
 ```text
 device_systems/
 │
 ├── app/
-│   ├── __init__.py
 │   │
 │   ├── main.py
 │   │
-│   ├── routes/
+│   ├── database/
 │   │   ├── __init__.py
-│   │   └── user_routes.py
+│   │   └── connection.py
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── user_model.py
 │   │
 │   ├── schemas/
 │   │   ├── __init__.py
 │   │   └── user_schema.py
 │   │
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   └── user_routes.py
+│   │
 │   ├── services/
 │   │   ├── __init__.py
 │   │   └── user_service.py
 │   │
-│   ├── dependencies/
-│   │   ├── __init__.py
-│   │   └── user_dependencies.py
-│   │
-│   └── data/
+│   └── dependencies/
 │       ├── __init__.py
-│       └── users_db.py
+│       ├── database_dependency.py
+│       └── user_dependencies.py
 │
 ├── evidencias/
-│
 ├── src/
-│
 ├── .gitignore
 ├── .python-version
 ├── pyproject.toml
@@ -120,9 +154,11 @@ device_systems/
 └── README.md
 ```
 
+El archivo `device_systems.db` es generado automáticamente por SQLite al iniciar la aplicación. Contiene los datos persistidos de los usuarios y debe mantenerse fuera del repositorio si está incluido en el `.gitignore`.
+
 ---
 
-# 📁 Descripción de los módulos
+# Descripción de los módulos
 
 ## `app/main.py`
 
@@ -130,7 +166,13 @@ Es el archivo principal de la aplicación.
 
 Aquí se configura la instancia de FastAPI, la información de la API, los datos de contacto, las rutas y los encabezados personalizados.
 
-También se encuentra el endpoint raíz:
+También se inicializan las tablas de la base de datos mediante:
+
+```python
+Base.metadata.create_all(bind=engine)
+```
+
+El endpoint raíz es:
 
 ```text
 GET /
@@ -138,25 +180,85 @@ GET /
 
 ---
 
-## `app/routes/user_routes.py`
+## `app/database/connection.py`
 
-Contiene los endpoints relacionados con la gestión de usuarios.
+Contiene la configuración de conexión con la base de datos SQLite.
 
-Aquí se definen las operaciones:
+La URL utilizada es:
 
-- GET
-- POST
-- PUT
-- PATCH
-- DELETE
+```python
+DATABASE_URL = "sqlite:///./device_systems.db"
+```
 
-Las rutas utilizan los servicios y las dependencias para mantener separada la lógica de negocio.
+También contiene:
+
+- `engine`
+- `SessionLocal`
+- `Base`
+
+Estos elementos permiten configurar SQLAlchemy y establecer la conexión con la base de datos.
 
 ---
 
+## `app/models/user_model.py`
+
+Contiene el modelo de SQLAlchemy correspondiente a la tabla `users`.
+
+El modelo incluye los siguientes campos:
+
+| Campo | Tipo | Restricción |
+|---|---|---|
+| `id` | Integer | Clave primaria |
+| `name` | String | No nulo |
+| `email` | String | Único y no nulo |
+| `role` | String | No nulo |
+| `is_active` | Boolean | Valor predeterminado `True` |
+| `created_at` | DateTime | Fecha de creación |
+
+La tabla utilizada en SQLite se denomina:
+
+```text
+users
+```
+
+---
+
+# Modelo de usuario
+
+El modelo SQLAlchemy se encuentra en:
+
+```text
+app/models/user_model.py
+```
+
+Su estructura representa los datos almacenados en la base de datos.
+
+Ejemplo:
+
+```python
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False, index=True)
+    role = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+```
+
+La separación entre el modelo SQLAlchemy y los esquemas Pydantic permite diferenciar:
+
+- La estructura utilizada para almacenar datos.
+- La estructura utilizada para recibir y responder información mediante la API.
+
+---
+
+# Esquemas Pydantic
+
 ## `app/schemas/user_schema.py`
 
-Contiene los modelos de Pydantic utilizados para validar los datos.
+Contiene los esquemas utilizados para validar los datos enviados y devueltos por la API.
 
 ### `UserBase`
 
@@ -171,7 +273,7 @@ Campos:
 
 ### `UserCreate`
 
-Se utiliza para crear nuevos usuarios.
+Se utiliza para crear nuevos usuarios mediante `POST`.
 
 ### `UserUpdate`
 
@@ -187,37 +289,102 @@ Sus campos son opcionales.
 
 ### `UserResponse`
 
-Define la estructura de los datos que devuelve la API e incluye el campo `id`.
+Define la estructura de los datos devueltos por la API.
+
+Incluye:
+
+- `id`
+- `name`
+- `email`
+- `role`
+- `is_active`
+- `created_at`
+
+También utiliza:
+
+```python
+ConfigDict(from_attributes=True)
+```
+
+para permitir la conversión de objetos SQLAlchemy a respuestas Pydantic.
 
 ---
 
+# Servicios
+
 ## `app/services/user_service.py`
 
-Contiene la lógica de negocio relacionada con los usuarios.
+Contiene la lógica de acceso y modificación de los usuarios mediante SQLAlchemy.
 
 Entre sus funciones se encuentran:
 
 ```text
 get_all_users()
+
 get_user_by_id()
+
+get_user_by_email()
+
 email_exists()
+
 create_user()
+
 update_user()
+
 update_user_partial()
+
 delete_user()
 ```
 
-Esta separación permite evitar que toda la lógica quede directamente dentro de las rutas.
+El servicio utiliza una sesión SQLAlchemy:
+
+```python
+db: Session
+```
+
+para realizar consultas y operaciones sobre la base de datos.
+
+La separación de esta lógica permite mantener las rutas más organizadas.
+
+---
+
+# Dependency Injection
+
+FastAPI permite utilizar **Dependency Injection** mediante `Depends()`.
+
+## `app/dependencies/database_dependency.py`
+
+Contiene la dependencia encargada de proporcionar una sesión de SQLAlchemy:
+
+```python
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+```
+
+De esta manera, los endpoints pueden recibir automáticamente una sesión de base de datos.
+
+Ejemplo:
+
+```python
+def get_users(
+    db: Session = Depends(get_db)
+):
+    ...
+```
+
+La sesión se cierra automáticamente después de completar la solicitud.
 
 ---
 
 ## `app/dependencies/user_dependencies.py`
 
-Contiene dependencias reutilizables de FastAPI.
+Contiene la dependencia:
 
-Actualmente se utiliza:
-
-```python
+```text
 get_user_or_404()
 ```
 
@@ -225,169 +392,53 @@ Esta función busca un usuario por su ID.
 
 Si el usuario existe, lo devuelve.
 
-Si no existe, genera automáticamente un error:
+Si no existe, genera:
 
 ```text
-404 Usuario no encontrado
+404 Not Found
 ```
+
+con el mensaje:
+
+```json
+{
+    "detail": "Usuario no encontrado"
+}
+```
+
+Esto permite reutilizar la misma lógica en diferentes endpoints.
 
 ---
 
-## `app/data/users_db.py`
-
-Contiene la información de usuarios utilizada como una base de datos temporal en memoria.
-
-Ejemplo:
-
-```python
-users_db = [
-    {
-        "id": 1,
-        "name": "Kelly",
-        "email": "kelly@example.com",
-        "role": "admin",
-        "is_active": True
-    }
-]
-```
-
-Los datos son temporales y se reinician cuando se reinicia la aplicación.
-
----
-
-# ⚙️ Instalación
-
-## 1. Clonar el repositorio
-
-```bash
-git clone URL_DEL_REPOSITORIO
-```
-
-Ingresar a la carpeta:
-
-```bash
-cd device_systems
-```
-
----
-
-## 2. Crear el entorno virtual
-
-Utilizando `uv`:
-
-```bash
-uv venv
-```
-
----
-
-## 3. Activar el entorno virtual
-
-En Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
----
-
-## 4. Instalar las dependencias
-
-Con `uv`:
-
-```bash
-uv sync
-```
-
-También es posible instalar las dependencias utilizando:
-
-```bash
-uv pip install -r requirements.txt
-```
-
----
-
-# ▶️ Ejecución del proyecto
-
-Para iniciar el servidor:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-El parámetro:
-
-```text
---reload
-```
-
-permite que el servidor se reinicie automáticamente cuando se realizan cambios en el código.
-
-La API estará disponible en:
-
-```text
-http://127.0.0.1:8000
-```
-
----
-
-# 📚 Documentación de la API
-
-FastAPI genera automáticamente documentación interactiva.
-
-## Swagger UI
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-Desde Swagger es posible:
-
-- Consultar endpoints.
-- Enviar solicitudes.
-- Probar parámetros.
-- Probar cuerpos JSON.
-- Ver respuestas.
-- Revisar códigos HTTP.
-- Consultar los modelos de Pydantic.
-
-## ReDoc
-
-```text
-http://127.0.0.1:8000/redoc
-```
-
-ReDoc presenta la documentación de la API en un formato alternativo.
-
----
-
-# 🔗 Endpoints disponibles
+# Endpoints disponibles
 
 | Método | Endpoint | Descripción | Código exitoso |
 |---|---|---|---:|
 | GET | `/` | Verificar funcionamiento de la API | 200 |
-| GET | `/users/` | Obtener todos los usuarios | 200 |
+| GET | `/users` | Obtener todos los usuarios | 200 |
 | GET | `/users/{user_id}` | Obtener usuario por ID | 200 |
-| POST | `/users/` | Crear usuario | 201 |
+| POST | `/users` | Crear usuario | 201 |
 | PUT | `/users/{user_id}` | Actualizar usuario completo | 200 |
 | PATCH | `/users/{user_id}` | Actualizar parcialmente un usuario | 200 |
 | DELETE | `/users/{user_id}` | Eliminar usuario | 204 |
 
 ---
 
-# 🔎 GET - Obtener usuarios
+# GET - Obtener usuarios
 
 ## Obtener todos los usuarios
 
 Endpoint:
 
 ```text
-GET /users/
+GET /users
 ```
 
-Devuelve la lista de usuarios registrados.
+Devuelve los usuarios almacenados en SQLite.
 
-Ejemplo de respuesta:
+Los resultados se ordenan por nombre.
+
+Ejemplo:
 
 ```json
 [
@@ -396,48 +447,52 @@ Ejemplo de respuesta:
         "email": "kelly@example.com",
         "role": "admin",
         "is_active": true,
-        "id": 1
-    },
-    {
-        "name": "Carlos",
-        "email": "carlos@example.com",
-        "role": "support",
-        "is_active": true,
-        "id": 2
+        "id": 1,
+        "created_at": "2026-09-19T03:00:00"
     }
 ]
 ```
 
+La fecha y hora de `created_at` dependen del momento en que se creó el registro.
+
 ---
 
-# 🔎 Filtros de usuarios
+# Filtros de usuarios
 
 El endpoint permite filtrar los usuarios mediante parámetros de consulta.
 
 ## Filtrar por rol
 
 ```text
-GET /users/?role=admin
+GET /users?role=admin
 ```
 
-Ejemplo:
+También:
 
 ```text
-GET /users/?role=support
+GET /users?role=support
+```
+
+o:
+
+```text
+GET /users?role=user
 ```
 
 ---
 
 ## Filtrar por estado
 
+Para usuarios activos:
+
 ```text
-GET /users/?is_active=true
+GET /users?is_active=true
 ```
 
-También se puede utilizar:
+Para usuarios inactivos:
 
 ```text
-GET /users/?is_active=false
+GET /users?is_active=false
 ```
 
 ---
@@ -447,12 +502,26 @@ GET /users/?is_active=false
 Es posible utilizar ambos parámetros:
 
 ```text
-GET /users/?role=admin&is_active=true
+GET /users?role=admin&is_active=true
 ```
 
 ---
 
-# 🔎 GET - Obtener usuario por ID
+# Ordenamiento
+
+Los usuarios obtenidos mediante `GET /users` se ordenan por nombre de forma ascendente.
+
+La consulta utilizada en el servicio es equivalente a:
+
+```python
+query.order_by(User.name.asc()).all()
+```
+
+Esto permite presentar los registros de manera organizada.
+
+---
+
+# GET - Obtener usuario por ID
 
 Endpoint:
 
@@ -466,19 +535,9 @@ Ejemplo:
 GET /users/1
 ```
 
-Respuesta:
+Si el usuario existe, la API devuelve su información.
 
-```json
-{
-    "name": "Kelly",
-    "email": "kelly@example.com",
-    "role": "admin",
-    "is_active": true,
-    "id": 1
-}
-```
-
-Si el usuario no existe:
+Si no existe:
 
 ```json
 {
@@ -494,12 +553,12 @@ Código:
 
 ---
 
-# ➕ POST - Crear usuario
+# POST - Crear usuario
 
 Endpoint:
 
 ```text
-POST /users/
+POST /users
 ```
 
 Ejemplo de solicitud:
@@ -521,7 +580,8 @@ Respuesta:
     "email": "maria@example.com",
     "role": "user",
     "is_active": true,
-    "id": 4
+    "id": 3,
+    "created_at": "2026-09-19T03:00:00"
 }
 ```
 
@@ -531,9 +591,11 @@ Código exitoso:
 201 Created
 ```
 
+El `id` y `created_at` son generados al guardar el registro.
+
 ---
 
-# ✏️ PUT - Actualizar usuario completo
+# PUT - Actualizar usuario completo
 
 Endpoint:
 
@@ -574,7 +636,7 @@ Si el correo ya pertenece a otro usuario:
 400 Bad Request
 ```
 
-Ejemplo de respuesta:
+Respuesta:
 
 ```json
 {
@@ -584,7 +646,7 @@ Ejemplo de respuesta:
 
 ---
 
-# 📝 PATCH - Actualizar usuario parcialmente
+# PATCH - Actualizar usuario parcialmente
 
 Endpoint:
 
@@ -594,19 +656,19 @@ PATCH /users/{user_id}
 
 A diferencia de `PUT`, `PATCH` permite modificar solamente los campos necesarios.
 
-Por ejemplo, para cambiar únicamente el rol:
-
-```json
-{
-    "role": "support"
-}
-```
-
-También se puede modificar solamente el estado:
+Ejemplo:
 
 ```json
 {
     "is_active": false
+}
+```
+
+También se puede modificar el rol:
+
+```json
+{
+    "role": "support"
 }
 ```
 
@@ -632,7 +694,7 @@ Código:
 
 ---
 
-# 🗑️ DELETE - Eliminar usuario
+# DELETE - Eliminar usuario
 
 Endpoint:
 
@@ -646,7 +708,7 @@ Ejemplo:
 DELETE /users/2
 ```
 
-Si el usuario existe, es eliminado correctamente.
+Si el usuario existe, se elimina de la base de datos.
 
 Código:
 
@@ -654,15 +716,15 @@ Código:
 204 No Content
 ```
 
-Si el usuario no existe:
+El código `204` no devuelve un cuerpo de respuesta, por lo que Swagger puede mostrar únicamente el código de estado.
 
-```json
-{
-    "detail": "Usuario no encontrado"
-}
+Para comprobar la eliminación se puede realizar posteriormente:
+
+```text
+GET /users/2
 ```
 
-Código:
+La API debe responder:
 
 ```text
 404 Not Found
@@ -670,9 +732,48 @@ Código:
 
 ---
 
-# ⚠️ Manejo de errores
+# Persistencia de datos
 
-La API utiliza `HTTPException` de FastAPI para generar respuestas de error controladas.
+Una de las principales diferencias de esta versión respecto a la actividad anterior es el uso de una base de datos real.
+
+La aplicación utiliza:
+
+```text
+SQLite
+```
+
+y almacena la información en:
+
+```text
+device_systems.db
+```
+
+La conexión se configura mediante:
+
+```python
+DATABASE_URL = "sqlite:///./device_systems.db"
+```
+
+Anteriormente los usuarios se almacenaban en una estructura en memoria.
+
+En esta versión, los registros permanecen almacenados después de reiniciar el servidor.
+
+Durante las pruebas se comprobó que:
+
+1. Se creó un usuario mediante `POST`.
+2. El usuario apareció mediante `GET`.
+3. Se detuvo el servidor.
+4. Se inició nuevamente la aplicación.
+5. El usuario continuó disponible.
+6. Después de eliminar un usuario, su consulta mediante `GET` devolvió `404`.
+
+Esto permitió comprobar la persistencia de los datos en SQLite.
+
+---
+
+# Manejo de errores
+
+La API utiliza `HTTPException` de FastAPI y manejo de `IntegrityError` de SQLAlchemy para controlar diferentes situaciones.
 
 ## Usuario inexistente
 
@@ -680,7 +781,7 @@ La API utiliza `HTTPException` de FastAPI para generar respuestas de error contr
 404 Not Found
 ```
 
-Mensaje:
+Respuesta:
 
 ```json
 {
@@ -696,7 +797,7 @@ Mensaje:
 400 Bad Request
 ```
 
-Mensaje:
+Respuesta:
 
 ```json
 {
@@ -704,11 +805,19 @@ Mensaje:
 }
 ```
 
-Este error se controla en:
+Este control se aplica en:
 
-- POST
-- PUT
-- PATCH
+- `POST`
+- `PUT`
+- `PATCH`
+
+Además, la base de datos utiliza la restricción:
+
+```python
+unique=True
+```
+
+sobre el campo `email`.
 
 ---
 
@@ -718,7 +827,7 @@ Este error se controla en:
 400 Bad Request
 ```
 
-Mensaje:
+Respuesta:
 
 ```json
 {
@@ -730,7 +839,7 @@ Mensaje:
 
 ## Datos inválidos
 
-FastAPI y Pydantic validan automáticamente los datos enviados.
+FastAPI y Pydantic validan automáticamente los datos recibidos.
 
 Cuando los datos no cumplen las reglas definidas, FastAPI responde:
 
@@ -747,24 +856,11 @@ Ejemplos:
 
 ---
 
-# 📊 Códigos de estado HTTP
-
-| Código | Significado | Uso |
-|---:|---|---|
-| 200 | OK | Solicitud procesada correctamente |
-| 201 | Created | Usuario creado correctamente |
-| 204 | No Content | Usuario eliminado correctamente |
-| 400 | Bad Request | Datos no permitidos o correo duplicado |
-| 404 | Not Found | Usuario inexistente |
-| 422 | Unprocessable Entity | Error de validación de Pydantic |
-
----
-
-# 🔐 Validación con Pydantic
+# Validación con Pydantic
 
 La API utiliza Pydantic para validar los datos recibidos.
 
-Por ejemplo:
+Ejemplo:
 
 ```python
 class UserBase(BaseModel):
@@ -778,17 +874,15 @@ class UserBase(BaseModel):
     is_active: bool = True
 ```
 
-Estas validaciones permiten controlar:
-
-### Nombre
+## Nombre
 
 Debe tener como mínimo 3 caracteres.
 
-### Correo
+## Correo
 
 Debe tener un formato válido de correo electrónico.
 
-### Rol
+## Rol
 
 Solamente se permiten:
 
@@ -798,7 +892,7 @@ support
 user
 ```
 
-### Estado
+## Estado
 
 El campo `is_active` utiliza un valor booleano:
 
@@ -809,49 +903,321 @@ false
 
 ---
 
-# 💉 Dependency Injection
+# Restricciones de SQLAlchemy
 
-FastAPI permite utilizar **Dependency Injection** mediante `Depends()`.
+El modelo SQLAlchemy utiliza restricciones para mantener la integridad de los datos.
 
-En este proyecto se creó la dependencia:
+## Clave primaria
 
-```python
-get_user_or_404()
-```
-
-Su objetivo es buscar un usuario por ID antes de ejecutar determinadas operaciones.
-
-Ejemplo:
+El campo `id` se define como:
 
 ```python
-def get_user(
-    user=Depends(get_user_or_404)
-):
-    return user
+primary_key=True
 ```
 
-De esta manera, la ruta recibe directamente el usuario encontrado.
+## Correo único
 
-Si el usuario no existe, la dependencia genera automáticamente:
+El campo `email` utiliza:
 
-```text
-404 Usuario no encontrado
+```python
+unique=True
 ```
 
-Esto permite reutilizar la misma lógica en diferentes endpoints y evita repetir código.
+Esto evita que existan dos usuarios con el mismo correo.
+
+## Campos obligatorios
+
+Los campos principales utilizan:
+
+```python
+nullable=False
+```
+
+para evitar valores nulos en:
+
+- `name`
+- `email`
+- `role`
+
+El campo `is_active` utiliza `True` como valor predeterminado.
 
 ---
 
-# 🧩 Separación de responsabilidades
+# Swagger y OpenAPI
 
-El proyecto utiliza una estructura organizada por responsabilidades.
+FastAPI genera automáticamente documentación interactiva.
+
+## Swagger UI
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Desde Swagger es posible:
+
+- Consultar endpoints.
+- Enviar solicitudes.
+- Probar parámetros.
+- Probar cuerpos JSON.
+- Ver respuestas.
+- Revisar códigos HTTP.
+- Consultar los modelos Pydantic.
+- Realizar pruebas del CRUD.
+
+## ReDoc
+
+```text
+http://127.0.0.1:8000/redoc
+```
+
+ReDoc presenta la documentación de la API en un formato alternativo.
+
+---
+
+# Instalación
+
+## 1. Clonar el repositorio
+
+```bash
+git clone URL_DEL_REPOSITORIO
+```
+
+Ingresar a la carpeta:
+
+```bash
+cd device_systems
+```
+
+---
+
+## 2. Crear el entorno virtual
+
+Utilizando `uv`:
+
+```bash
+uv venv
+```
+
+---
+
+## 3. Activar el entorno virtual
+
+En Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+---
+
+## 4. Instalar las dependencias
+
+Utilizando `uv`:
+
+```bash
+uv sync
+```
+
+También es posible utilizar:
+
+```bash
+uv pip install -r requirements.txt
+```
+
+---
+
+# Ejecución del proyecto
+
+Para iniciar el servidor:
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+También puede utilizarse:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+si el entorno virtual se encuentra activado.
+
+El parámetro:
+
+```text
+--reload
+```
+
+permite que el servidor se reinicie automáticamente cuando se realizan cambios en el código.
+
+La API estará disponible en:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# Documentación de la API
+
+Una vez iniciado el servidor se puede acceder a:
+
+### Swagger
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### ReDoc
+
+```text
+http://127.0.0.1:8000/redoc
+```
+
+---
+
+# Pruebas realizadas
+
+Las pruebas fueron realizadas utilizando Swagger UI.
+
+Se verificaron los siguientes escenarios:
+
+## Consultas
+
+- Obtener todos los usuarios.
+- Obtener usuario por ID.
+- Buscar usuario inexistente.
+- Filtrar por rol.
+- Filtrar por estado.
+- Verificar ordenamiento por nombre.
+
+## Creación
+
+- Crear usuario correctamente.
+- Crear usuario con correo inválido.
+- Crear usuario con nombre demasiado corto.
+- Crear usuario con rol inválido.
+- Crear usuario con correo duplicado.
+
+## Actualización completa
+
+- Actualizar usuario existente mediante `PUT`.
+- Intentar actualizar con correo duplicado.
+- Intentar actualizar un usuario inexistente.
+
+## Actualización parcial
+
+- Modificar un campo mediante `PATCH`.
+- Modificar varios campos.
+- Intentar realizar `PATCH` sin campos.
+
+## Eliminación
+
+- Eliminar usuario existente.
+- Comprobar que el usuario eliminado ya no existe.
+- Intentar consultar un usuario eliminado.
+- Intentar eliminar un usuario inexistente.
+
+## Persistencia
+
+- Crear usuarios.
+- Reiniciar el servidor.
+- Consultar nuevamente los usuarios.
+- Comprobar que los registros permanecen almacenados en SQLite.
+
+## Documentación
+
+- Verificar Swagger UI.
+- Verificar OpenAPI.
+- Verificar ReDoc.
+- Verificar endpoints documentados.
+- Verificar modelos y códigos de respuesta.
+
+---
+
+# Evidencias
+
+Las evidencias de las pruebas realizadas se encuentran en la carpeta:
+
+```text
+evidencias/
+```
+
+Los archivos utilizados son:
+
+```text
+01_get_users.jpeg
+02_get_user_id.jpeg
+03_query_role.jpeg
+04_query_is_active.jpeg
+05_post_usuario.jpeg
+06_email_invalido.jpeg
+07_nombre_corto.jpeg
+08_role_invalido.jpeg
+09_correo_duplicado.jpeg
+10_put_usuario.jpeg
+11_put_correo_duplicado.jpeg
+12_put_usuario_inexistente.jpeg
+13_patch_usuario.jpeg
+14_patch_vacio.jpeg
+15_delete_usuario.jpeg
+16_delete_usuario_inexistente.jpeg
+17_persistencia_sqlite.jpeg
+18_swagger_openapi.jpeg
+```
+
+---
+
+# Conceptos aplicados
+
+Durante el desarrollo de esta actividad se aplicaron los siguientes conceptos:
+
+- APIs REST.
+- FastAPI.
+- Pydantic.
+- SQLAlchemy.
+- ORM.
+- SQLite.
+- Persistencia de datos.
+- Modelos relacionales.
+- Validación de información.
+- CRUD.
+- Métodos HTTP.
+- Parámetros de ruta.
+- Parámetros de consulta.
+- Filtros.
+- Ordenamiento.
+- Códigos de estado HTTP.
+- Manejo de excepciones.
+- `HTTPException`.
+- `IntegrityError`.
+- Dependency Injection.
+- `Depends()`.
+- Sesiones de base de datos.
+- Swagger UI.
+- OpenAPI.
+- ReDoc.
+- Separación de responsabilidades.
+- Servicios.
+- Modelos SQLAlchemy.
+- Esquemas Pydantic.
+- Git y GitHub.
+- Gestión de dependencias con `uv`.
+
+---
+
+# Separación de responsabilidades
+
+El proyecto utiliza una estructura organizada por responsabilidades:
 
 ```text
 routes
    ↓
 services
    ↓
-data
+models
+   ↓
+database
 ```
 
 Mientras que:
@@ -860,7 +1226,7 @@ Mientras que:
 schemas
 ```
 
-se encarga de validar los datos.
+se encarga de validar la información recibida y enviada por la API.
 
 Y:
 
@@ -876,149 +1242,52 @@ Esta organización facilita:
 - La reutilización del código.
 - Las pruebas.
 - La lectura del proyecto.
-- La escalabilidad de la aplicación.
+- La separación de responsabilidades.
+- La futura escalabilidad de la aplicación.
 
 ---
 
-# 📖 Swagger y OpenAPI
+# Flujo de una solicitud
 
-La aplicación configura información personalizada para la documentación:
-
-```python
-app = FastAPI(
-    title="Device Systems API",
-    description="API REST para la gestión de usuarios del sistema device_systems.",
-    version="2.0.0",
-    contact={
-        "name": "Kelly Lopera",
-        "email": "johalopera15@gmail.com"
-    }
-)
-```
-
-Cada endpoint también cuenta con información como:
-
-- `summary`
-- `description`
-- `response_description`
-
-Esto permite que Swagger presente una documentación más clara y organizada.
-
----
-
-# 🧪 Pruebas realizadas
-
-Las pruebas fueron realizadas utilizando Swagger UI.
-
-Se verificaron diferentes escenarios:
-
-## Consultas
-
-- Obtener todos los usuarios.
-- Obtener usuario por ID.
-- Buscar usuario inexistente.
-- Filtrar por rol.
-- Filtrar por estado.
-
-## Creación
-
-- Crear usuario correctamente.
-- Crear usuario con correo inválido.
-- Crear usuario con nombre demasiado corto.
-- Crear usuario con rol inválido.
-- Crear usuario con correo duplicado.
-
-## Actualización completa
-
-- Actualizar usuario existente mediante PUT.
-- Intentar actualizar con correo duplicado.
-- Intentar actualizar un usuario inexistente.
-
-## Actualización parcial
-
-- Modificar un solo campo.
-- Modificar varios campos.
-- Intentar realizar PATCH sin campos.
-
-## Eliminación
-
-- Eliminar usuario existente.
-- Intentar eliminar usuario inexistente.
-
-## Documentación
-
-- Verificar Swagger UI.
-- Verificar información de OpenAPI.
-- Verificar endpoints documentados.
-- Verificar modelos y códigos de respuesta.
-
----
-
-# 📸 Evidencias
-
-Las evidencias de las pruebas realizadas se encuentran en la carpeta:
+El funcionamiento general de una operación sobre usuarios puede representarse de la siguiente manera:
 
 ```text
-evidencias/
+Cliente
+   ↓
+FastAPI / Route
+   ↓
+Dependency Injection
+   ↓
+Service
+   ↓
+SQLAlchemy
+   ↓
+SQLite
+   ↓
+Respuesta
 ```
 
-Entre las evidencias se incluyen:
+Por ejemplo, al crear un usuario:
 
 ```text
-01_get_users.jpeg
-02_get_user_id.jpeg
-03_query_role.jpeg
-04_query_is_active.jpeg
-05_post_user.jpeg
-06_email_invalido.jpeg
-07_nombre_corto.jpeg
-08_role_invalido.jpeg
-09_correo_duplicado.jpeg
-10_cabeceras.jpeg
-11_put_usuario.jpeg
-12_put_correo_duplicado.jpeg
-13_put_usuario_inexistente.jpeg
-14_patch_usuario.jpeg
-15_patch_vacio.jpeg
-16_delete_usuario.jpeg
-17_delete_usuario_inexistente.jpeg
-18_swagger_openapi.jpeg
+POST /users
+      ↓
+UserCreate
+      ↓
+Validación Pydantic
+      ↓
+user_service
+      ↓
+SQLAlchemy
+      ↓
+SQLite
+      ↓
+UserResponse
 ```
 
-> Los nombres anteriores corresponden a la organización propuesta para las evidencias de la actividad.
-
 ---
 
-# 🧠 Conceptos aplicados
-
-Durante el desarrollo de esta actividad se aplicaron los siguientes conceptos:
-
-- APIs REST.
-- FastAPI.
-- Pydantic.
-- Modelos de datos.
-- Validación de información.
-- CRUD.
-- Métodos HTTP.
-- Parámetros de ruta.
-- Parámetros de consulta.
-- Códigos de estado HTTP.
-- Manejo de excepciones.
-- `HTTPException`.
-- Dependency Injection.
-- `Depends()`.
-- Swagger UI.
-- OpenAPI.
-- ReDoc.
-- Separación de responsabilidades.
-- Servicios.
-- Dependencias reutilizables.
-- Simulación de persistencia en memoria.
-- Git y GitHub.
-
----
-
-# 🚀 Ventajas de FastAPI
+# Ventajas de FastAPI
 
 FastAPI permite desarrollar APIs modernas de manera rápida y organizada.
 
@@ -1032,26 +1301,30 @@ Entre sus principales ventajas se encuentran:
 - Uso de tipado de Python.
 - Manejo sencillo de rutas y parámetros.
 - Facilidad para construir APIs REST.
+- Integración con SQLAlchemy.
+- Manejo organizado de errores.
 
 ---
 
-# 💭 Reflexión
+# Reflexión
 
-El desarrollo de esta actividad permitió profundizar en el funcionamiento de FastAPI y comprender cómo una API puede organizarse de manera más estructurada.
+El desarrollo de esta actividad permitió avanzar desde una implementación que almacenaba los usuarios temporalmente en memoria hacia una solución que utiliza persistencia de datos mediante SQLite y SQLAlchemy.
 
-La implementación del CRUD permitió trabajar con las operaciones principales de una API REST, mientras que el manejo de errores permitió controlar diferentes situaciones que pueden ocurrir durante el uso de la aplicación.
+La incorporación de SQLAlchemy permitió comprender cómo una API puede trabajar con un modelo de datos y realizar operaciones CRUD directamente sobre una base de datos.
 
-También fue importante comprender el funcionamiento de `Depends()`, ya que permite reutilizar lógica y separar responsabilidades dentro del proyecto.
+También fue importante separar los modelos de SQLAlchemy de los esquemas de Pydantic, ya que cada uno cumple una función diferente dentro de la aplicación.
 
-La utilización de Swagger facilitó las pruebas de los endpoints y permitió visualizar de manera clara la estructura de la API.
+La utilización de Dependency Injection permitió administrar las sesiones de base de datos y reutilizar lógica dentro de los endpoints.
+
+Las pruebas realizadas mediante Swagger facilitaron la comprobación de los diferentes escenarios de éxito y error.
 
 ---
 
-# 📌 Conclusión
+# Conclusión
 
-La actividad permitió evolucionar la API `device_systems` desde una implementación básica hacia una aplicación con una estructura más organizada y funcionalidades más completas.
+La actividad permitió evolucionar la API `device_systems` hacia una arquitectura con persistencia de datos utilizando **FastAPI, SQLAlchemy y SQLite**.
 
-Se implementó un CRUD completo de usuarios utilizando:
+Se implementó un CRUD completo de usuarios mediante:
 
 ```text
 GET
@@ -1061,17 +1334,33 @@ PATCH
 DELETE
 ```
 
-Además, se incorporaron validaciones mediante Pydantic, manejo de errores HTTP, prevención de correos duplicados, Dependency Injection mediante `Depends()` y documentación automática mediante Swagger/OpenAPI.
+Además, se incorporaron:
 
-La separación entre rutas, esquemas, servicios, dependencias y datos permite que el proyecto tenga una estructura más clara y facilita futuras mejoras, como la integración de una base de datos real y un sistema de autenticación.
+- Modelos SQLAlchemy.
+- Sesiones de base de datos.
+- Persistencia mediante SQLite.
+- Validaciones mediante Pydantic.
+- Restricciones de integridad.
+- Validación de correos.
+- Validación de roles.
+- Prevención de correos duplicados.
+- Manejo de errores HTTP.
+- Dependency Injection.
+- Filtros por rol y estado.
+- Ordenamiento por nombre.
+- Documentación automática mediante Swagger/OpenAPI.
+- Pruebas de persistencia después de reiniciar la aplicación.
+
+La separación entre rutas, servicios, modelos, esquemas, dependencias y conexión de base de datos permite que el proyecto tenga una estructura clara y facilita futuras mejoras.
 
 ---
 
-# 👩‍💻 Autora
+# Autora
 
 **Kelly Lopera**
 
-Tecnólogo en Análisis y Desarrollo de Software  
+Tecnólogo en Análisis y Desarrollo de Software
+
 SENA
 
 Proyecto académico desarrollado como parte de la formación en ADSO.

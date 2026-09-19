@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -41,3 +43,6 @@ class UserPatch(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
