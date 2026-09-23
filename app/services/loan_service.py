@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -40,6 +40,8 @@ def get_all_loans(
     status_filter: str | None = None,
     user_email: str | None = None,
     device_type: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
 ):
     """Obtiene los préstamos aplicando los filtros opcionales."""
 
@@ -53,6 +55,14 @@ def get_all_loans(
 
     if device_type:
         query = query.where(Device.device_type.ilike(f"%{device_type}%"))
+
+    if start_date:
+        start_datetime = datetime.combine(start_date, datetime.min.time())
+        query = query.where(Loan.loan_date >= start_datetime)
+
+    if end_date:
+        end_datetime = datetime.combine(end_date, datetime.max.time())
+        query = query.where(Loan.loan_date <= end_datetime)    
 
     return db.scalars(query).all()
 

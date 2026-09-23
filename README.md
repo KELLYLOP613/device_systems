@@ -82,6 +82,7 @@ Desarrollar una API REST con FastAPI y SQLAlchemy que permita gestionar usuarios
 * Filtrar préstamos por estado.
 * Filtrar préstamos por correo electrónico del usuario.
 * Filtrar préstamos por tipo de dispositivo.
+* Filtrar préstamos por rango de fechas.
 * Validar la existencia de usuarios y dispositivos.
 * Manejar errores HTTP.
 * Documentar la API mediante Swagger/OpenAPI.
@@ -980,6 +981,26 @@ La consulta utiliza la relación entre `Loan` y `Device`.
 
 ---
 
+# Filtro por fecha
+
+Los préstamos pueden filtrarse utilizando un rango de fechas mediante los parámetros `start_date` y `end_date`.
+
+Para consultar préstamos desde una fecha determinada:
+
+GET /loans/?start_date=2026-09-01
+
+Para consultar préstamos dentro de un rango:
+
+GET /loans/?start_date=2026-09-01&end_date=2026-09-30
+
+`start_date` establece la fecha inicial del filtro y `end_date` establece la fecha final.
+
+Si la fecha inicial es posterior a la fecha final, la API responde:
+
+400 Bad Request
+
+Este filtro utiliza el campo `loan_date` del modelo `Loan`.
+
 # Consultas con JOIN
 
 Una de las principales incorporaciones de EV10 es la utilización de consultas con `JOIN`.
@@ -1415,6 +1436,7 @@ Se verificó:
 * Filtrar préstamos activos.
 * Filtrar por correo del usuario.
 * Filtrar por tipo de dispositivo.
+* Filtrar por rango de fechas.
 * Consultar información mediante joins.
 * Consultar historial de usuario.
 * Consultar historial de dispositivo.
@@ -1680,6 +1702,7 @@ Se implementaron:
 * Filtros por estado.
 * Filtros por correo del usuario.
 * Filtros por tipo de dispositivo.
+* Filtros por rango de fechas.
 * Manejo de errores HTTP.
 * Documentación mediante Swagger/OpenAPI.
 * Pruebas funcionales de las principales operaciones.
