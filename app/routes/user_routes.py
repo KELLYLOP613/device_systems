@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from app.models.user_model import User
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -175,3 +176,23 @@ def delete_existing_user(
 ):
     delete_user(db, user)
     return Response(status_code=204)
+
+@router.get(
+    "/{user_id}/loans",
+    summary="Consultar préstamos de un usuario",
+    description="Obtiene todos los préstamos asociados a un usuario.",
+    response_description="Lista de préstamos del usuario."
+)
+def get_user_loans(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+
+    return user.loans
