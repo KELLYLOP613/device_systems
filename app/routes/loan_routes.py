@@ -1,18 +1,22 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.database.connection import get_db
-from app.models.device_model import Device
-from app.models.loan_model import Loan
-from app.models.user_model import User
+from app.dependencies.database_dependency import get_db
+from app.dependencies.loan_dependencies import get_loan_or_404
 from app.schemas.loan_schema import (
     LoanCreate,
     LoanDetailResponse,
     LoanResponse,
 )
+from app.services.device_service import get_device_by_id
+from app.services.loan_service import (
+    create_loan,
+    device_has_active_loan,
+    get_all_loans,
+    get_loan_details,
+    return_loan,
+)
+from app.services.user_service import get_user_by_id
 
 router = APIRouter(
     prefix="/loans",
@@ -28,31 +32,10 @@ router = APIRouter(
     description="Obtiene los préstamos utilizando joins con usuarios y dispositivos.",
     response_description="Lista detallada de préstamos."
 )
-def get_loan_details(
+def list_loan_details(
     db: Session = Depends(get_db)
 ):
-    query = (
-        select(
-            Loan.id,
-            Loan.loan_date,
-            Loan.return_date,
-            Loan.status,
-            User.id.label("user_id"),
-            User.name.label("user_name"),
-            User.email.label("user_email"),
-            Device.id.label("device_id"),
-            Device.name.label("device_name"),
-            Device.serial_number,
-            Device.device_type,
-            Device.brand
-        )
-        .join(User, Loan.user_id == User.id)
-        .join(Device, Loan.device_id == Device.id)
-    )
-
-    result = db.execute(query)
-
-    return result.mappings().all()
+    return get_loan_details(db)
 
 
 # GET /loans
@@ -63,7 +46,7 @@ def get_loan_details(
     description="Obtiene todos los préstamos y permite aplicar filtros.",
     response_description="Lista de préstamos registrados."
 )
-def get_loans(
+def list_loans(
     status_filter: str | None = Query(
         default=None,
         alias="status"
@@ -72,28 +55,12 @@ def get_loans(
     device_type: str | None = Query(default=None),
     db: Session = Depends(get_db)
 ):
-    query = (
-        select(Loan)
-        .join(User)
-        .join(Device)
+    return get_all_loans(
+        db,
+        status_filter=status_filter,
+        user_email=user_email,
+        device_type=device_type,
     )
-
-    if status_filter:
-        query = query.where(
-            Loan.status == status_filter
-        )
-
-    if user_email:
-        query = query.where(
-            User.email.ilike(f"%{user_email}%")
-        )
-
-    if device_type:
-        query = query.where(
-            Device.device_type.ilike(f"%{device_type}%")
-        )
-
-    return db.scalars(query).all()
 
 
 # GET /loans/{loan_id}
@@ -105,20 +72,8 @@ def get_loans(
     response_description="Información del préstamo."
 )
 def get_loan(
-    loan_id: int,
-    db: Session = Depends(get_db)
+    loan=Depends(get_loan_or_404),
 ):
-    loan = db.get(
-        Loan,
-        loan_id
-    )
-
-    if not loan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Préstamo no encontrado"
-        )
-
     return loan
 
 
@@ -131,14 +86,11 @@ def get_loan(
     description="Registra un préstamo y cambia el dispositivo a no disponible.",
     response_description="Préstamo creado correctamente."
 )
-def create_loan(
+def create_new_loan(
     loan_data: LoanCreate,
     db: Session = Depends(get_db)
 ):
-    user = db.get(
-        User,
-        loan_data.user_id
-    )
+    user = get_user_by_id(db, loan_data.user_id)
 
     if not user:
         raise HTTPException(
@@ -146,10 +98,7 @@ def create_loan(
             detail="Usuario no encontrado"
         )
 
-    device = db.get(
-        Device,
-        loan_data.device_id
-    )
+    device = get_device_by_id(db, loan_data.device_id)
 
     if not device:
         raise HTTPException(
@@ -163,33 +112,13 @@ def create_loan(
             detail="El dispositivo no está disponible"
         )
 
-    active_loan = db.scalar(
-        select(Loan).where(
-            Loan.device_id == loan_data.device_id,
-            Loan.status == "active"
-        )
-    )
-
-    if active_loan:
+    if device_has_active_loan(db, loan_data.device_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="El dispositivo ya tiene un préstamo activo"
         )
 
-    loan = Loan(
-        user_id=loan_data.user_id,
-        device_id=loan_data.device_id,
-        loan_date=datetime.utcnow(),
-        status="active"
-    )
-
-    device.is_available = False
-
-    db.add(loan)
-    db.commit()
-    db.refresh(loan)
-
-    return loan
+    return create_loan(db, loan_data, device)
 
 
 # PATCH /loans/{loan_id}/return
@@ -200,39 +129,16 @@ def create_loan(
     description="Registra la devolución y vuelve a habilitar el dispositivo.",
     response_description="Préstamo devuelto correctamente."
 )
-def return_loan(
-    loan_id: int,
+def return_existing_loan(
+    loan=Depends(get_loan_or_404),
     db: Session = Depends(get_db)
 ):
-    loan = db.get(
-        Loan,
-        loan_id
-    )
-
-    if not loan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Préstamo no encontrado"
-        )
-
     if loan.status != "active":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="El préstamo ya fue devuelto"
         )
 
-    device = db.get(
-        Device,
-        loan.device_id
-    )
+    device = get_device_by_id(db, loan.device_id)
 
-    loan.return_date = datetime.utcnow()
-    loan.status = "returned"
-
-    if device:
-        device.is_available = True
-
-    db.commit()
-    db.refresh(loan)
-
-    return loan
+    return return_loan(db, loan, device)
