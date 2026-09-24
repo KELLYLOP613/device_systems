@@ -1,9 +1,13 @@
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from sqlalchemy.orm import Session
-
+from app.rate_limiter import limiter
 from app.dependencies.database_dependency import get_db
 from app.dependencies.loan_dependencies import get_loan_or_404
+from app.dependencies.auth_dependency import (
+    get_current_active_user,
+    require_admin_or_support,
+)
 from app.schemas.loan_schema import (
     LoanCreate,
     LoanDetailResponse,
@@ -34,7 +38,8 @@ router = APIRouter(
     response_description="Lista detallada de préstamos."
 )
 def list_loan_details(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_or_support),
 ):
     return get_loan_details(db)
 
@@ -103,9 +108,12 @@ def get_loan(
     description="Registra un préstamo y cambia el dispositivo a no disponible.",
     response_description="Préstamo creado correctamente."
 )
+@limiter.limit("10/minute")
 def create_new_loan(
+    request: Request,
     loan_data: LoanCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     user = get_user_by_id(db, loan_data.user_id)
 
@@ -148,7 +156,8 @@ def create_new_loan(
 )
 def return_existing_loan(
     loan=Depends(get_loan_or_404),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_or_support),
 ):
     if loan.status != "active":
         raise HTTPException(

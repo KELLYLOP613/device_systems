@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
+from app.dependencies.auth_dependency import get_current_active_user
 from app.dependencies.database_dependency import get_db
 from app.dependencies.user_dependencies import get_user_or_404
+from app.rate_limiter import limiter
 from app.schemas.user_schema import (
     UserCreate,
     UserPatch,
@@ -30,10 +31,13 @@ router = APIRouter(prefix="/users", tags=["Users"])
     description="Obtiene los usuarios y permite filtrarlos por rol y estado.",
     response_description="Lista de usuarios registrados.",
 )
+@limiter.limit("30/minute")
 def get_users(
+    request: Request,
     role: str | None = Query(default=None),
     is_active: bool | None = Query(default=None),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return get_all_users(
         db,
@@ -61,6 +65,7 @@ def get_user_loans(
 )
 def get_user(
     user=Depends(get_user_or_404),
+    current_user=Depends(get_current_active_user),
 ):
     return user
 
