@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.dependencies.database_dependency import get_db
 from app.dependencies.device_dependencies import get_device_or_404
+from app.dependencies.auth_dependency import (
+    require_admin,
+    require_admin_or_support,
+)
 from app.schemas.device_schema import (
     DeviceCreate,
     DeviceResponse,
@@ -81,7 +85,8 @@ def get_device(
 )
 def create_new_device(
     device_data: DeviceCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_or_support),
 ):
     if serial_number_exists(db, device_data.serial_number):
         raise HTTPException(
@@ -101,7 +106,8 @@ def create_new_device(
 def update_existing_device(
     device_data: DeviceCreate,
     device=Depends(get_device_or_404),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_or_support),
 ):
     if serial_number_exists(
         db,
@@ -157,7 +163,8 @@ def patch_existing_device(
 )
 def delete_existing_device(
     device=Depends(get_device_or_404),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin),
 ):
     delete_device(db, device)
     return None
